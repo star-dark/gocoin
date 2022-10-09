@@ -1,17 +1,45 @@
 package main
 
-import "fmt"
+import (
+	"crypto/sha256"
+	"fmt"
+)
 
-type info struct {
-	name string
-	age  int
+type block struct {
+	data     string
+	hash     string
+	prevHash string
+}
+type blockchain struct {
+	blocks []block
 }
 
-func (i info) sayHello() {
-	fmt.Printf("내 이름은 %s 내 나이는 %d야", i.name, i.age)
+func (b *blockchain) getLastHash() string {
+	if len(b.blocks) > 0 {
+		return b.blocks[len(b.blocks)-1].hash
+	}
+	return ""
+}
+
+func (b *blockchain) addBlock(data string) {
+	newBlock := block{data, "", b.getLastHash()}
+	hash := sha256.Sum256([]byte(newBlock.data + newBlock.hash))
+	newBlock.hash = fmt.Sprintf("%x", hash)
+	b.blocks = append(b.blocks, newBlock)
+}
+
+func (b *blockchain) listBlock() {
+	for _, block := range b.blocks {
+		fmt.Printf("Data: %s\n", block.data)
+		fmt.Printf("Hash: %s\n", block.hash)
+		fmt.Printf("PrevHash: %s\n", block.prevHash)
+	}
 }
 
 func main() {
-	introduce := info{"대형", 23}
-	introduce.sayHello()
+	chain := blockchain{}
+	chain.addBlock("Genesis Block")
+	chain.addBlock("second Block")
+	chain.addBlock("third Block")
+	chain.listBlock()
 }
